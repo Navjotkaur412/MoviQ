@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoviQ — Book the Show</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1117;
+  --bg-elevated:#171A23;
+  --panel:#1C2030;
+  --panel-2:#232841;
+  --line:#2A3049;
+  --gold:#E8B84B;
+  --gold-dim:#8A6A2A;
+  --teal:#29D9C8;
+  --red:#E23F5C;
+  --success:#3ECF8E;
+  --text:#F5F3ED;
+  --muted:#9CA3B5;
+  --faint:#5E6479;
+  --radius:14px;
+  --display: 'Bebas Neue', sans-serif;
+  --body: 'Manrope', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{background:var(--bg); color:var(--text); font-family:var(--body); scroll-behavior:smooth;}
+body{min-height:100vh; overflow-x:hidden;}
+::selection{background:var(--gold); color:#161616;}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--panel-2); border-radius:10px;}
+
+@media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+.app{max-width:1180px; margin:0 auto; padding:0 24px;}
+
+/* ---------- Marquee bulb border ---------- */
+.bulb-row{display:flex; gap:9px; overflow:hidden; padding:0 2px;}
+.bulb{width:5px; height:5px; border-radius:50%; background:var(--gold-dim); flex:none; animation:bulbPulse 2.4s infinite ease-in-out;}
+.bulb:nth-child(3n){animation-delay:.3s;}
+.bulb:nth-child(4n){animation-delay:.6s;}
+.bulb:nth-child(5n){animation-delay:.9s;}
+@keyframes bulbPulse{0%,100%{background:var(--gold-dim); box-shadow:none;} 50%{background:var(--gold); box-shadow:0 0 8px 1px var(--gold);}}
+
+/* ---------- Nav ---------- */
+header.nav{position:sticky; top:0; z-index:50; background:rgba(15,17,23,.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+.nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 24px;}
+.brand{display:flex; align-items:center; gap:10px; cursor:pointer;}
+.brand-mark{width:34px; height:34px; border-radius:8px; background:linear-gradient(145deg,var(--gold),#a9772b); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-size:20px; color:#161616; letter-spacing:1px;}
+.brand-name{font-family:var(--display); font-size:26px; letter-spacing:2px; color:var(--text);}
+.brand-name span{color:var(--gold);}
+.nav-links{display:flex; gap:28px; align-items:center;}
+.nav-links a{color:var(--muted); text-decoration:none; font-size:14px; font-weight:600; cursor:pointer; transition:color .2s;}
+.nav-links a:hover, .nav-links a.active{color:var(--gold);}
+.nav-cta{display:flex; align-items:center; gap:14px;}
+.pill{padding:9px 18px; border-radius:100px; font-size:13px; font-weight:700; cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--text); transition:.2s; font-family:var(--body);}
+.pill.gold{background:var(--gold); border-color:var(--gold); color:#161616;}
+.pill.gold:hover{background:#f2c765; box-shadow:0 0 20px -4px var(--gold);}
+.pill:hover{border-color:var(--gold);}
+
+/* ---------- Hero ---------- */
+.hero{padding:56px 0 40px; display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:center;}
+.eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--teal); display:flex; align-items:center; gap:10px;}
+.eyebrow::before{content:''; width:22px; height:1px; background:var(--teal);}
+.hero h1{font-family:var(--display); font-size:74px; line-height:.92; letter-spacing:1px; margin:16px 0 18px; text-wrap:balance;}
+.hero h1 em{font-style:normal; color:var(--gold);}
+.hero p{color:var(--muted); font-size:16px; line-height:1.7; max-width:480px; margin-bottom:28px;}
+.hero-actions{display:flex; gap:14px;}
+.btn{padding:14px 26px; border-radius:10px; font-weight:800; font-size:14px; border:none; cursor:pointer; transition:.2s; font-family:var(--body);}
+.btn.primary{background:var(--gold); color:#161616;}
+.btn.primary:hover{transform:translateY(-2px); box-shadow:0 10px 30px -10px var(--gold);}
+.btn.ghost{background:transparent; border:1px solid var(--line); color:var(--text);}
+.btn.ghost:hover{border-color:var(--muted);}
+.hero-visual{position:relative; height:360px; border-radius:20px; overflow:hidden; border:1px solid var(--line); background:
+  radial-gradient(ellipse at 30% 20%, rgba(232,184,75,.18), transparent 55%),
+  radial-gradient(ellipse at 80% 80%, rgba(41,217,200,.16), transparent 55%),
+  linear-gradient(160deg,#1a1e2c,#12141c);}
+.reel-strip{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; padding:14px;}
+.reel-strip .row{display:flex; gap:8px;}
+.reel-strip .hole{width:10px; height:10px; border-radius:2px; background:#0d0e14; border:1px solid rgba(255,255,255,.05);}
+.hero-stat-card{position:absolute; bottom:20px; left:20px; right:20px; background:rgba(15,17,23,.72); backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:14px; padding:18px 20px; display:flex; justify-content:space-between; gap:12px;}
+.hero-stat{text-align:left;}
+.hero-stat b{display:block; font-family:var(--display); font-size:26px; letter-spacing:1px; color:var(--gold);}
+.hero-stat span{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;}
+
+/* ---------- Section shell ---------- */
+section{padding:52px 0;}
+.section-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:26px;}
+.section-head h2{font-family:var(--display); font-size:34px; letter-spacing:1px;}
+.section-head p.sub{color:var(--muted); font-size:13px; font-family:var(--mono); letter-spacing:.5px; margin-top:4px;}
+.section-head a{color:var(--gold); font-size:13px; font-weight:700; text-decoration:none; cursor:pointer;}
+
+/* ---------- Movie grid ---------- */
+.movie-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+.movie-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:.25s; position:relative;}
+.movie-card:hover{transform:translateY(-6px); border-color:var(--gold-dim); box-shadow:0 20px 40px -20px rgba(0,0,0,.6);}
+.poster{height:200px; position:relative; display:flex; align-items:flex-end; padding:14px;}
+.poster::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 40%, rgba(0,0,0,.75)); }
+.poster .badge{position:relative; z-index:2; font-family:var(--mono); font-size:11px; background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.15); padding:4px 9px; border-radius:100px; color:var(--gold);}
+.movie-info{padding:16px;}
+.movie-info h3{font-family:var(--display); font-size:22px; letter-spacing:.5px; margin-bottom:4px;}
+.movie-meta{display:flex; gap:10px; color:var(--muted); font-size:12px; font-family:var(--mono); margin-bottom:10px;}
+.movie-tags{display:flex; gap:6px; flex-wrap:wrap;}
+.tag{font-size:10px; padding:4px 9px; border-radius:100px; background:var(--panel-2); color:var(--muted); border:1px solid var(--line); letter-spacing:.5px; text-transform:uppercase;}
+.rating{position:absolute; top:12px; right:12px; z-index:2; background:rgba(15,17,23,.75); border:1px solid var(--gold-dim); color:var(--gold); font-family:var(--mono); font-size:12px; font-weight:700; padding:4px 8px; border-radius:8px;}
+
+/* ---------- Modules strip ---------- */
+.modules{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+.module-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px; }
+.module-card .num{font-family:var(--mono); color:var(--faint); font-size:12px;}
+.module-card h4{font-family:var(--display); font-size:19px; letter-spacing:.5px; margin:8px 0 6px;}
+.module-card p{color:var(--muted); font-size:12.5px; line-height:1.6;}
+
+footer{border-top:1px solid var(--line); padding:34px 0; margin-top:40px; color:var(--faint); font-size:12px; display:flex; justify-content:space-between;}
+
+/* ---------- Toasts ---------- */
+#toast-stack{position:fixed; top:86px; right:24px; z-index:200; display:flex; flex-direction:column; gap:10px; width:340px;}
+.toast{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:10px; padding:13px 16px; font-size:13px; box-shadow:0 12px 30px -12px rgba(0,0,0,.6); animation:toastIn .3s ease; display:flex; gap:10px; align-items:flex-start;}
+.toast.warn{border-left-color:var(--red);}
+.toast.good{border-left-color:var(--success);}
+.toast .dot{width:7px; height:7px; border-radius:50%; margin-top:5px; background:var(--teal); flex:none;}
+.toast.warn .dot{background:var(--red);}
+.toast.good .dot{background:var(--success);}
+.toast b{display:block; margin-bottom:2px;}
+.toast span{color:var(--muted); font-size:12px;}
+@keyframes toastIn{from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);}}
+@keyframes toastOut{to{opacity:0; transform:translateX(20px);}}
+
+/* ---------- Views ---------- */
+.view{display:none;}
+.view.active{display:block; animation:fadeIn .35s ease;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+/* ---------- Breadcrumb / stepper ---------- */
+.stepper{display:flex; align-items:center; gap:10px; margin:28px 0 8px; font-family:var(--mono); font-size:12px; color:var(--faint);}
+.stepper .step{display:flex; align-items:center; gap:8px;}
+.stepper .step.active{color:var(--gold);}
+.stepper .step.done{color:var(--success);}
+.stepper .sep{width:26px; height:1px; background:var(--line);}
+
+/* ---------- Movie detail ---------- */
+.detail-hero{display:grid; grid-template-columns:280px 1fr; gap:32px; margin:24px 0 36px;}
+.detail-poster{height:380px; border-radius:16px; position:relative; overflow:hidden; border:1px solid var(--line);}
+.detail-poster .rating{top:16px; right:16px;}
+.detail-body h1{font-family:var(--display); font-size:52px; letter-spacing:1px; margin-bottom:10px;}
+.detail-body .movie-meta{font-size:13px; margin-bottom:14px;}
+.detail-body .synopsis{color:var(--muted); line-height:1.8; max-width:640px; margin-bottom:22px; font-size:14.5px;}
+
+.date-row{display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;}
+.date-chip{padding:10px 16px; border-radius:10px; border:1px solid var(--line); background:var(--panel); cursor:pointer; text-align:center; min-width:64px; transition:.2s;}
+.date-chip b{display:block; font-family:var(--display); font-size:18px;}
+.date-chip span{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+.date-chip:hover{border-color:var(--gold-dim);}
+.date-chip.active{background:var(--gold); border-color:var(--gold);}
+.date-chip.active b, .date-chip.active span{color:#161616;}
+
+.show-group{margin-bottom:22px;}
+.show-group h4{font-size:13px; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; font-family:var(--mono);}
+.show-row{display:flex; gap:12px; flex-wrap:wrap;}
+.show-chip{padding:12px 18px; border-radius:10px; border:1px solid var(--line); background:var(--panel); cursor:pointer; transition:.2s; position:relative; min-width:100px;}
+.show-chip:hover{border-color:var(--teal);}
+.show-chip b{display:block; font-family:var(--mono); font-size:15px;}
+.show-chip span{font-size:10.5px; color:var(--muted);}
+.show-chip .avail{position:absolute; top:8px; right:10px; font-size:9px; font-family:var(--mono); color:var(--success);}
+.show-chip .avail.low{color:var(--red);}
+
+/* ---------- Seat selection ---------- */
+.booking-layout{display:grid; grid-template-columns:1fr 320px; gap:30px; align-items:start; margin-top:20px;}
+.seat-panel{background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:32px 24px 26px;}
+.screen-wrap{display:flex; justify-content:center; margin-bottom:34px;}
+.screen-svg{width:100%; max-width:520px;}
+.seat-map{display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:22px;}
+.seat-row{display:flex; align-items:center; gap:10px;}
+.row-label{width:18px; font-family:var(--mono); font-size:11px; color:var(--faint); text-align:center;}
+.seats{display:flex; gap:7px;}
+.aisle-gap{width:16px;}
+.seat{width:26px; height:24px; border-radius:6px 6px 4px 4px; border:1px solid var(--line); background:var(--panel-2); cursor:pointer; transition:.15s; position:relative; font-family:var(--mono); font-size:9px; display:flex; align-items:center; justify-content:center; color:var(--faint);}
+.seat:hover:not(.booked):not(.held-other){transform:translateY(-2px); border-color:var(--teal);}
+.seat.selected{background:var(--teal); border-color:var(--teal); color:#0b1a18; box-shadow:0 0 12px -1px var(--teal);}
+.seat.booked{background:#2a1c22; border-color:#40232c; color:#6b3b48; cursor:not-allowed;}
+.seat.held-other{background:#2a2413; border-color:#5c4a1a; color:var(--gold-dim); cursor:not-allowed; animation:heldPulse 1.4s infinite;}
+.seat.vip{border-color:var(--gold-dim);}
+.seat.conflict{animation:shake .4s;}
+@keyframes heldPulse{0%,100%{opacity:1;} 50%{opacity:.5;}}
+@keyframes shake{0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);}}
+
+.legend{display:flex; gap:18px; flex-wrap:wrap; justify-content:center; font-size:11px; color:var(--muted); border-top:1px solid var(--line); padding-top:18px;}
+.legend .item{display:flex; align-items:center; gap:6px;}
+.legend .sw{width:14px; height:13px; border-radius:4px; border:1px solid var(--line);}
+.sw.available{background:var(--panel-2);}
+.sw.selected{background:var(--teal); border-color:var(--teal);}
+.sw.booked{background:#2a1c22; border-color:#40232c;}
+.sw.held{background:#2a2413; border-color:#5c4a1a;}
+
+.demo-box{margin-top:22px; border:1px dashed var(--gold-dim); border-radius:14px; padding:16px 18px; background:rgba(232,184,75,.04);}
+.demo-box h5{font-family:var(--mono); font-size:11px; color:var(--gold); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;}
+.demo-box p{font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:12px;}
+
+/* ---------- Summary panel ---------- */
+.summary{background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:24px; position:sticky; top:90px;}
+.summary h3{font-family:var(--display); font-size:22px; letter-spacing:.5px; margin-bottom:4px;}
+.summary .sub{font-size:12px; color:var(--muted); margin-bottom:18px; font-family:var(--mono);}
+.timer{display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:18px;}
+.timer .clock{font-family:var(--mono); font-size:20px; color:var(--gold); font-weight:700;}
+.timer .lbl{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+.seat-list{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; min-height:24px;}
+.seat-list .chip{font-family:var(--mono); font-size:11px; background:var(--panel-2); border:1px solid var(--line); padding:4px 9px; border-radius:100px; color:var(--teal);}
+.price-row{display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:8px;}
+.price-row b{color:var(--text);}
+.total-row{display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:14px; margin-top:6px; margin-bottom:18px;}
+.total-row .lbl{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;}
+.total-row .amt{font-family:var(--display); font-size:28px; color:var(--gold); letter-spacing:1px;}
+.btn-block{width:100%; padding:15px; border-radius:12px;}
+
+/* ---------- Checkout ---------- */
+.checkout-layout{display:grid; grid-template-columns:1fr 320px; gap:30px; margin-top:20px;}
+.pay-panel{background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:30px;}
+.pay-panel h3{font-family:var(--display); font-size:24px; margin-bottom:18px; letter-spacing:.5px;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:11.5px; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px;}
+.field input{width:100%; background:var(--bg-elevated); border:1px solid var(--line); border-radius:10px; padding:12px 14px; color:var(--text); font-family:var(--body); font-size:14px; outline:none; transition:.2s;}
+.field input:focus{border-color:var(--teal);}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.pay-method{display:flex; gap:10px; margin-bottom:20px;}
+.pay-method .opt{flex:1; border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center; cursor:pointer; font-size:12px; font-weight:700; color:var(--muted); transition:.2s;}
+.pay-method .opt.active{border-color:var(--teal); color:var(--teal); background:rgba(41,217,200,.06);}
+.secure-note{display:flex; align-items:center; gap:8px; color:var(--faint); font-size:11.5px; margin-top:16px;}
+
+/* ---------- Alert banner (seat conflict) ---------- */
+.alert-banner{display:none; align-items:flex-start; gap:12px; background:rgba(226,63,92,.08); border:1px solid rgba(226,63,92,.35); border-radius:14px; padding:16px 18px; margin-bottom:20px;}
+.alert-banner.show{display:flex; animation:fadeIn .3s ease;}
+.alert-banner .ic{width:30px; height:30px; border-radius:8px; background:rgba(226,63,92,.18); display:flex; align-items:center; justify-content:center; color:var(--red); font-family:var(--display); font-size:16px; flex:none;}
+.alert-banner b{display:block; margin-bottom:3px; color:#ff8fa1;}
+.alert-banner span{font-size:12.5px; color:var(--muted); line-height:1.5;}
+
+/* ---------- Confirmation ticket ---------- */
+.ticket-wrap{max-width:560px; margin:30px auto; }
+.ticket{background:linear-gradient(160deg,#1a1e2c,#161824); border:1px solid var(--line); border-radius:22px; overflow:hidden; position:relative;}
+.ticket-top{padding:30px 30px 20px; display:flex; justify-content:space-between; gap:20px;}
+.ticket-top h2{font-family:var(--display); font-size:30px; letter-spacing:.5px; margin-bottom:6px;}
+.ticket-top .sub{color:var(--muted); font-size:12.5px; font-family:var(--mono);}
+.ticket-qr{width:74px; height:74px; border-radius:10px; background:
+  repeating-linear-gradient(45deg, #1e2333 0 4px, #262c42 4px 8px);
+  border:1px solid var(--line); flex:none;}
+.perforation{position:relative; height:0; border-top:2px dashed var(--line); margin:0 24px;}
+.perforation::before, .perforation::after{content:''; position:absolute; top:-11px; width:22px; height:22px; border-radius:50%; background:var(--bg);}
+.perforation::before{left:-34px;}
+.perforation::after{right:-34px;}
+.ticket-bottom{padding:22px 30px 30px; display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+.ticket-field span{display:block; font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;}
+.ticket-field b{font-family:var(--mono); font-size:14.5px; color:var(--text);}
+.ticket-id{grid-column:1/-1; text-align:center; padding-top:8px; border-top:1px dashed var(--line); margin-top:4px;}
+.ticket-id b{font-size:20px; color:var(--gold); letter-spacing:2px;}
+.confirm-actions{display:flex; gap:12px; justify-content:center; margin-top:26px;}
+
+/* ---------- Live activity feed ---------- */
+.activity-feed{margin-top:18px; max-height:120px; overflow:hidden; font-family:var(--mono); font-size:11px; color:var(--faint);}
+.activity-feed .row{padding:5px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; opacity:.85;}
+
+@media (max-width:920px){
+  .hero{grid-template-columns:1fr;}
+  .hero h1{font-size:52px;}
+  .movie-grid{grid-template-columns:repeat(2,1fr);}
+  .modules{grid-template-columns:repeat(2,1fr);}
+  .booking-layout, .checkout-layout{grid-template-columns:1fr;}
+  .summary{position:static;}
+  .detail-hero{grid-template-columns:1fr;}
+  .detail-poster{height:220px;}
+  .nav-links{display:none;}
+}
+@media (max-width:520px){
+  .movie-grid{grid-template-columns:1fr;}
+  .modules{grid-template-columns:1fr;}
+  .hero h1{font-size:40px;}
+  .ticket-bottom{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast-stack"></div>
+
+<header class="nav">
+  <div class="bulb-row" id="bulbTop"></div>
+  <div class="app nav-inner">
+    <div class="brand" onclick="go('home')">
+      <div class="brand-mark">M</div>
+      <div class="brand-name">Movi<span>Q</span></div>
+    </div>
+    <nav class="nav-links">
+      <a onclick="go('home')" class="nav-link" data-v="home">Now Showing</a>
+      <a onclick="go('mybookings')" class="nav-link" data-v="mybookings">My Bookings</a>
+      <a onclick="go('home')">Cinemas</a>
+      <a onclick="go('home')">Offers</a>
+    </nav>
+    <div class="nav-cta">
+      <button class="pill">Sign In</button>
+      <button class="pill gold" onclick="go('home')">Book Now</button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- ============ HOME VIEW ============ -->
+  <div class="view active" id="view-home">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Booking, without the guesswork</div>
+        <h1>Your seat is <em>never</em><br>double booked.</h1>
+        <p>MoviQ locks every seat the instant you pick it, in real time, across every device booking the same show — so what you see is exactly what you get, right through to payment.</p>
+        <div class="hero-actions">
+          <button class="btn primary" onclick="go('movie','m1')">Book Tickets</button>
+          <button class="btn ghost" onclick="scrollToId('modules')">How it works</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="reel-strip">
+          <div class="row" id="reelHoles"></div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="hero-stat"><b>10,482</b><span>Seats locked live</span></div>
+          <div class="hero-stat"><b>0</b><span>Double bookings ever</span></div>
+          <div class="hero-stat"><b>212ms</b><span>Avg. lock response</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="now-showing">
+      <div class="section-head">
+        <div><h2>Now Showing</h2><p class="sub">// select a title to view showtimes</p></div>
+        <a>View all →</a>
+      </div>
+      <div class="movie-grid" id="movieGrid"></div>
+    </section>
+
+    <section id="modules">
+      <div class="section-head">
+        <div><h2>Platform Modules</h2><p class="sub">// what powers MoviQ end to end</p></div>
+      </div>
+      <div class="modules">
+        <div class="module-card"><div class="num">01</div><h4>Catalog &amp; Shows</h4><p>Movies, cinemas, screens &amp; showtimes, fully manageable from the admin console.</p></div>
+        <div class="module-card"><div class="num">02</div><h4>Live Seat Locking</h4><p>Distributed, fair-conflict seat reservation engine — the core of MoviQ.</p></div>
+        <div class="module-card"><div class="num">03</div><h4>Checkout &amp; Payments</h4><p>Seat re-validation at payment, mock/pluggable gateway integration.</p></div>
+        <div class="module-card"><div class="num">04</div><h4>Accounts &amp; Tickets</h4><p>Auth, booking history, e-tickets with QR check-in.</p></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ MOVIE DETAIL VIEW ============ -->
+  <div class="view" id="view-movie">
+    <div class="stepper">
+      <div class="step active">01 · Showtime</div><div class="sep"></div>
+      <div class="step">02 · Seats</div><div class="sep"></div>
+      <div class="step">03 · Payment</div><div class="sep"></div>
+      <div class="step">04 · Ticket</div>
+    </div>
+    <div class="detail-hero">
+      <div class="detail-poster" id="detailPoster"><div class="rating" id="detailRating"></div></div>
+      <div class="detail-body">
+        <h1 id="detailTitle"></h1>
+        <div class="movie-meta" id="detailMeta"></div>
+        <div class="movie-tags" id="detailTags" style="margin-bottom:16px;"></div>
+        <p class="synopsis" id="detailSynopsis"></p>
+      </div>
+    </div>
+
+    <div class="date-row" id="dateRow"></div>
+    <div id="showGroups"></div>
+  </div>
+
+  <!-- ============ SEAT SELECTION VIEW ============ -->
+  <div class="view" id="view-seats">
+    <div class="stepper">
+      <div class="step done">01 · Showtime</div><div class="sep"></div>
+      <div class="step active">02 · Seats</div><div class="sep"></div>
+      <div class="step">03 · Payment</div><div class="sep"></div>
+      <div class="step">04 · Ticket</div>
+    </div>
+
+    <div class="alert-banner" id="seatAlert">
+      <div class="ic">!</div>
+      <div><b id="seatAlertTitle">Seat conflict detected</b><span id="seatAlertBody"></span></div>
+    </div>
+
+    <div class="booking-layout">
+      <div class="seat-panel">
+        <div class="screen-wrap">
+          <svg class="screen-svg" viewBox="0 0 500 60">
+            <path d="M20,50 Q250,0 480,50" fill="none" stroke="#29D9C8" stroke-width="2" opacity="0.55"/>
+            <path d="M20,50 Q250,0 480,50" fill="none" stroke="#29D9C8" stroke-width="14" opacity="0.06" filter="blur(4px)"/>
+          </svg>
+        </div>
+        <div style="text-align:center; font-family:var(--mono); font-size:11px; color:var(--faint); letter-spacing:3px; margin-top:-22px; margin-bottom:26px;">S C R E E N</div>
+
+        <div class="seat-map" id="seatMap"></div>
+
+        <div class="legend">
+          <div class="item"><span class="sw available"></span> Available</div>
+          <div class="item"><span class="sw selected"></span> Your selection</div>
+          <div class="item"><span class="sw held"></span> Held by another user</div>
+          <div class="item"><span class="sw booked"></span> Booked</div>
+        </div>
+
+        <div class="demo-box">
+          <h5>Concurrency Demo</h5>
+          <p>MoviQ's core feature: click below to simulate <b>two different users clicking the same seat at the exact same instant</b>. Because neither request can fairly be said to have arrived first, MoviQ voids <b>both</b> attempts rather than arbitrarily awarding the seat — releasing it back to everyone.</p>
+          <button class="btn ghost" onclick="runConcurrencyDemo()">Simulate simultaneous click on one seat</button>
+        </div>
+
+        <div class="activity-feed" id="activityFeed"></div>
+      </div>
+
+      <div class="summary">
+        <h3 id="sumMovieTitle">—</h3>
+        <div class="sub" id="sumShowInfo">—</div>
+        <div class="timer">
+          <div>
+            <div class="lbl">Seats held for</div>
+            <div class="clock" id="holdClock">05:00</div>
+          </div>
+        </div>
+        <div class="seat-list" id="seatChips"><span style="color:var(--faint); font-size:12px;">No seats selected yet</span></div>
+        <div class="price-row"><span>Tickets (<span id="seatCount">0</span>)</span><b id="ticketSubtotal">₹0</b></div>
+        <div class="price-row"><span>Convenience fee</span><b id="convFee">₹0</b></div>
+        <div class="total-row"><div class="lbl">Total</div><div class="amt" id="totalAmt">₹0</div></div>
+        <button class="btn primary btn-block" id="proceedBtn" onclick="proceedToPay()" disabled>Proceed to Pay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CHECKOUT VIEW ============ -->
+  <div class="view" id="view-checkout">
+    <div class="stepper">
+      <div class="step done">01 · Showtime</div><div class="sep"></div>
+      <div class="step done">02 · Seats</div><div class="sep"></div>
+      <div class="step active">03 · Payment</div><div class="sep"></div>
+      <div class="step">04 · Ticket</div>
+    </div>
+
+    <div class="alert-banner" id="payAlert">
+      <div class="ic">!</div>
+      <div><b>Seat no longer available</b><span id="payAlertBody"></span></div>
+    </div>
+
+    <div class="checkout-layout">
+      <div class="pay-panel">
+        <h3>Contact &amp; Payment</h3>
+        <div class="field-row">
+          <div class="field"><label>Full name</label><input type="text" placeholder="Aditi Sharma" value="Aditi Sharma"></div>
+          <div class="field"><label>Mobile number</label><input type="text" placeholder="+91 98xxxxxxx" value="+91 98765 43210"></div>
+        </div>
+        <div class="field"><label>Email</label><input type="email" placeholder="you@example.com" value="aditi@example.com"></div>
+
+        <div class="pay-method">
+          <div class="opt active">UPI</div>
+          <div class="opt">Card</div>
+          <div class="opt">Net Banking</div>
+          <div class="opt">Wallet</div>
+        </div>
+        <div class="field"><label>UPI ID</label><input type="text" placeholder="name@bank"></div>
+
+        <button class="btn primary btn-block" onclick="confirmPayment()">Confirm &amp; Pay <span id="payAmtLabel"></span></button>
+        <div class="secure-note">Your seats are re-verified against the live seat map the instant you pay.</div>
+      </div>
+
+      <div class="summary">
+        <h3 id="coMovieTitle">—</h3>
+        <div class="sub" id="coShowInfo">—</div>
+        <div class="seat-list" id="coSeatChips"></div>
+        <div class="price-row"><span>Tickets</span><b id="coSubtotal">₹0</b></div>
+        <div class="price-row"><span>Convenience fee</span><b id="coFee">₹0</b></div>
+        <div class="total-row"><div class="lbl">Total</div><div class="amt" id="coTotal">₹0</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CONFIRMATION VIEW ============ -->
+  <div class="view" id="view-confirm">
+    <div class="stepper">
+      <div class="step done">01 · Showtime</div><div class="sep"></div>
+      <div class="step done">02 · Seats</div><div class="sep"></div>
+      <div class="step done">03 · Payment</div><div class="sep"></div>
+      <div class="step active">04 · Ticket</div>
+    </div>
+    <div class="ticket-wrap">
+      <div class="ticket">
+        <div class="ticket-top">
+          <div>
+            <h2 id="tkMovie">—</h2>
+            <div class="sub" id="tkShow">—</div>
+          </div>
+          <div class="ticket-qr"></div>
+        </div>
+        <div class="perforation"></div>
+        <div class="ticket-bottom">
+          <div class="ticket-field"><span>Cinema</span><b>MoviQ Grand — Screen 3</b></div>
+          <div class="ticket-field"><span>Seats</span><b id="tkSeats">—</b></div>
+          <div class="ticket-field"><span>Guest</span><b>Aditi Sharma</b></div>
+          <div class="ticket-field"><span>Amount Paid</span><b id="tkAmt">—</b></div>
+          <div class="ticket-id"><span>Booking ID</span><br><b id="tkId">—</b></div>
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn ghost" onclick="go('mybookings')">View My Bookings</button>
+        <button class="btn primary" onclick="go('home')">Book Another Movie</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MY BOOKINGS VIEW ============ -->
+  <div class="view" id="view-mybookings">
+    <div class="section-head" style="margin-top:24px;">
+      <div><h2>My Bookings</h2><p class="sub">// past &amp; upcoming tickets, this session</p></div>
+    </div>
+    <div id="bookingsList" style="display:flex; flex-direction:column; gap:14px;"></div>
+  </div>
+
+  <footer>
+    <div>© 2026 MoviQ · Every seat, verified twice.</div>
+    <div>Built with a fair-conflict seat locking engine</div>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   MoviQ — front-end demo
+   Simulates the backend's fair-conflict seat locking engine
+   entirely in-browser (see /backend for the real implementation
+   using MongoDB transactions + a Redis-backed lock service).
+   ============================================================ */
+
+// ---------- bulb border ----------
+(function(){
+  const row = document.getElementById('bulbTop');
+  const n = Math.ceil(window.innerWidth/14);
+  for(let i=0;i<n;i++){ const b=document.createElement('div'); b.className='bulb'; row.appendChild(b); }
+})();
+(function(){
+  const row = document.getElementById('reelHoles');
+  for(let i=0;i<9;i++){ const h=document.createElement('div'); h.className='hole'; row.appendChild(h); }
+})();
+
+// ---------- data ----------
+const MOVIES = [
+  {id:'m1', title:'Glass Horizon', genre:['Sci-Fi','Drama'], rating:'8.7', runtime:'2h 18m', cert:'UA', grad:['#2b3a67','#0d1117'], synopsis:'A terraforming engineer on a dying orbital station discovers the horizon she has spent a decade building may already belong to someone else.'},
+  {id:'m2', title:'Paper Tigers', genre:['Comedy'], rating:'7.9', runtime:'1h 54m', cert:'U', grad:['#5c3a21','#0d1117'], synopsis:"Two rival street-food vendors are forced into a delivery partnership during the city's biggest festival weekend."},
+  {id:'m3', title:'The Long Static', genre:['Thriller'], rating:'8.2', runtime:'2h 05m', cert:'A', grad:['#3a1f2b','#0d1117'], synopsis:'A radio operator picks up a distress signal that keeps repeating — from a ship that was decommissioned nine years ago.'},
+  {id:'m4', title:'Marigold & Iron', genre:['Romance','Drama'], rating:'8.0', runtime:'2h 12m', cert:'UA', grad:['#1f3a33','#0d1117'], synopsis:"A sculptor and a florist rebuild a war memorial together, and slowly, everything else they thought they'd lost."},
+  {id:'m5', title:'Nightshift Protocol', genre:['Action'], rating:'7.6', runtime:'1h 58m', cert:'UA', grad:['#241f3a','#0d1117'], synopsis:'A security AI and its skeptical night-shift operator are the last line of defence when a facility goes dark, floor by floor.'},
+  {id:'m6', title:'Sundown Ledger', genre:['Mystery'], rating:'8.4', runtime:'2h 21m', cert:'A', grad:['#3a3320','#0d1117'], synopsis:"An auditor finds a decades-old ledger that doesn't just record a town's debts — it predicts them."},
+];
+
+function seededShows(movieId){
+  return [
+    {date:'Today', dow:'30 Aug', times:[
+      {t:'10:30 AM', price:220, screen:'Screen 1', avail:'high'},
+      {t:'1:45 PM', price:260, screen:'Screen 3', avail:'high'},
+      {t:'6:15 PM', price:320, screen:'Screen 1', avail:'low'},
+      {t:'9:40 PM', price:340, screen:'Screen 3', avail:'high'},
+    ]},
+    {date:'Tomorrow', dow:'31 Aug', times:[
+      {t:'11:00 AM', price:220, screen:'Screen 2', avail:'high'},
+      {t:'3:30 PM', price:260, screen:'Screen 1', avail:'high'},
+      {t:'7:00 PM', price:340, screen:'Screen 3', avail:'high'},
+    ]},
+    {date:'Tue', dow:'1 Sep', times:[
+      {t:'12:15 PM', price:220, screen:'Screen 2', avail:'high'},
+      {t:'5:00 PM', price:300, screen:'Screen 1', avail:'high'},
+      {t:'9:00 PM', price:340, screen:'Screen 3', avail:'low'},
+    ]},
+  ];
+}
+
+// ---------- global state ----------
+let state = {
+  view: 'home',
+  movie: null,
+  showKey: null,      // "date|time"
+  showLabel: '',
+  price: 0,
+  selectedSeats: [],   // seat ids held by ME in this session
+  holdSeconds: 300,
+  holdInterval: null,
+  bookings: []
+};
+
+// per-show seat store, persists across the session so "booked" / "held" seats feel real
+const seatStores = {};
+const ROWS = ['A','B','C','D','E','F','G'];
+const COLS_PER_ROW = 12;
+
+function getSeatStore(showKey){
+  if(!seatStores[showKey]){
+    const store = {};
+    ROWS.forEach((r,ri)=>{
+      for(let c=1;c<=COLS_PER_ROW;c++){
+        const id = r+c;
+        // seed a handful of already-booked seats for realism
+        const rand = Math.random();
+        store[id] = {status: rand<0.18 ? 'booked' : 'available', vip: ri<2, lockedBy:null, lockExpiry:null};
+      }
+    });
+    seatStores[showKey] = store;
+  }
+  return seatStores[showKey];
+}
+
+// ---------- routing ----------
+function go(view, movieId){
+  if(movieId) loadMovie(movieId);
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(a=>a.classList.toggle('active', a.dataset.v===view));
+  state.view = view;
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(view==='mybookings') renderBookings();
+}
+function scrollToId(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+
+// ---------- toast ----------
+function toast(title, body, kind){
+  const stack = document.getElementById('toast-stack');
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind?' '+kind:'');
+  el.innerHTML = `<div class="dot"></div><div><b>${title}</b><span>${body||''}</span></div>`;
+  stack.appendChild(el);
+  setTimeout(()=>{ el.style.animation='toastOut .3s ease forwards'; setTimeout(()=>el.remove(),300); }, 4200);
+}
+
+// ---------- home: render movie grid ----------
+function renderMovies(){
+  const grid = document.getElementById('movieGrid');
+  grid.innerHTML = MOVIES.map(m=>`
+    <div class="movie-card" onclick="go('movie','${m.id}')">
+      <div class="poster" style="background:linear-gradient(150deg, ${m.grad[0]}, ${m.grad[1]})">
+        <div class="rating">${m.rating}/10</div>
+        <span class="badge">${m.cert} · ${m.runtime}</span>
+      </div>
+      <div class="movie-info">
+        <h3>${m.title}</h3>
+        <div class="movie-meta">${m.genre.join(' / ')}</div>
+        <div class="movie-tags">${m.genre.map(g=>`<span class="tag">${g}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+renderMovies();
+
+// ---------- movie detail ----------
+let activeDateIdx = 0;
+function loadMovie(id){
+  const m = MOVIES.find(x=>x.id===id);
+  state.movie = m;
+  activeDateIdx = 0;
+  document.getElementById('detailPoster').style.background = `linear-gradient(150deg, ${m.grad[0]}, ${m.grad[1]})`;
+  document.getElementById('detailRating').textContent = m.rating+'/10';
+  document.getElementById('detailTitle').textContent = m.title;
+  document.getElementById('detailMeta').textContent = `${m.cert} · ${m.runtime} · ${m.genre.join(', ')}`;
+  document.getElementById('detailTags').innerHTML = m.genre.map(g=>`<span class="tag">${g}</span>`).join('');
+  document.getElementById('detailSynopsis').textContent = m.synopsis;
+  renderDates(m.id);
+}
+function renderDates(movieId){
+  const shows = seededShows(movieId);
+  const row = document.getElementById('dateRow');
+  row.innerHTML = shows.map((s,i)=>`
+    <div class="date-chip ${i===activeDateIdx?'active':''}" onclick="selectDate(${i})">
+      <b>${s.dow.split(' ')[0]}</b><span>${s.date}</span>
+    </div>`).join('');
+  renderShowGroups(movieId, activeDateIdx);
+}
+function selectDate(i){ activeDateIdx = i; renderDates(state.movie.id); }
+function renderShowGroups(movieId, dateIdx){
+  const shows = seededShows(movieId)[dateIdx];
+  const wrap = document.getElementById('showGroups');
+  wrap.innerHTML = `
+    <div class="show-group">
+      <h4>MoviQ Grand — ${shows.dow}</h4>
+      <div class="show-row">
+        ${shows.times.map(t=>`
+          <div class="show-chip" onclick="pickShow('${movieId}','${shows.date}','${t.t}',${t.price},'${t.screen}')">
+            <span class="avail ${t.avail==='low'?'low':''}">${t.avail==='low'?'Filling fast':'Available'}</span>
+            <b>${t.t}</b>
+            <span>${t.screen} · ₹${t.price}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+function pickShow(movieId, date, time, price, screen){
+  state.showKey = movieId+'|'+date+'|'+time;
+  state.showLabel = `${date} · ${time} · ${screen}`;
+  state.price = price;
+  state.selectedSeats = [];
+  go('seats');
+  renderSeatMap();
+  startHoldTimer();
+  updateSummary();
+  startActivityFeed();
+}
+
+// ---------- seat map ----------
+function renderSeatMap(){
+  const store = getSeatStore(state.showKey);
+  const map = document.getElementById('seatMap');
+  map.innerHTML = ROWS.map(r=>{
+    let seatsHtml = '';
+    for(let c=1;c<=COLS_PER_ROW;c++){
+      const id = r+c;
+      const seat = store[id];
+      let cls = 'seat';
+      if(seat.vip) cls += ' vip';
+      if(state.selectedSeats.includes(id)) cls += ' selected';
+      else if(seat.status==='booked') cls += ' booked';
+      else if(seat.status==='held') cls += ' held-other';
+      const gap = (c===6) ? '<span class="aisle-gap"></span>' : '';
+      seatsHtml += `<div class="${cls}" id="seat-${id}" onclick="clickSeat('${id}')">${c}</div>${gap}`;
+    }
+    return `<div class="seat-row"><div class="row-label">${r}</div><div class="seats">${seatsHtml}</div></div>`;
+  }).join('');
+}
+
+// fair-conflict lock simulation --------------------------------------
+// pendingRequests: seatId -> array of {who, resolve}
+const pendingRequests = {};
+const LOCK_WINDOW_MS = 260; // collision detection window
+
+function requestSeatLock(seatId, who){
+  return new Promise(resolve=>{
+    if(!pendingRequests[seatId]) pendingRequests[seatId] = [];
+    pendingRequests[seatId].push({who, resolve});
+    // batch all requests that land within the collision window
+    if(pendingRequests[seatId].length === 1){
+      setTimeout(()=>resolveSeatRequests(seatId), LOCK_WINDOW_MS);
+    }
+  });
+}
+function resolveSeatRequests(seatId){
+  const reqs = pendingRequests[seatId] || [];
+  delete pendingRequests[seatId];
+  const store = getSeatStore(state.showKey);
+  const seat = store[seatId];
+  if(seat.status !== 'available'){
+    reqs.forEach(r=>r.resolve({ok:false, reason:'unavailable'}));
+    return;
+  }
+  if(reqs.length > 1){
+    // true simultaneous collision — nobody wins, seat stays available
+    reqs.forEach(r=>r.resolve({ok:false, reason:'conflict'}));
+    return;
+  }
+  // exactly one clean request in this window — grant the hold
+  seat.status = 'held';
+  seat.lockedBy = reqs[0].who;
+  reqs[0].resolve({ok:true});
+}
+
+async function clickSeat(seatId){
+  const store = getSeatStore(state.showKey);
+  const seat = store[seatId];
+  if(seat.status==='booked') { toast('Already booked', 'This seat was booked by another guest.', 'warn'); return; }
+
+  // deselecting one of my own held seats
+  if(state.selectedSeats.includes(seatId)){
+    seat.status='available'; seat.lockedBy=null;
+    state.selectedSeats = state.selectedSeats.filter(s=>s!==seatId);
+    renderSeatMap(); updateSummary();
+    return;
+  }
+  if(seat.status==='held'){ toast('Seat locked', 'Someone else is currently holding this seat.', 'warn'); return; }
+
+  document.getElementById('seat-'+seatId).style.opacity=.5;
+  const result = await requestSeatLock(seatId, 'me');
+  document.getElementById('seat-'+seatId).style.opacity=1;
+
+  if(result.ok){
+    state.selectedSeats.push(seatId);
+    renderSeatMap(); updateSummary();
+  } else if(result.reason==='conflict'){
+    const el = document.getElementById('seat-'+seatId);
+    if(el){ el.classList.add('conflict'); setTimeout(()=>el.classList.remove('conflict'), 400); }
+    flashAlert('seatAlert','Seat conflict detected', `Seat ${seatId} was clicked by two users at the exact same instant — neither booking was allowed to go through unfairly. The seat has been released back to everyone. Please try again.`);
+    toast('Conflict — both requests voided', `Seat ${seatId} returned to available.`, 'warn');
+  } else {
+    renderSeatMap();
+    toast('Just missed it', `Seat ${seatId} was booked moments ago.`, 'warn');
+  }
+}
+
+function runConcurrencyDemo(){
+  const store = getSeatStore(state.showKey);
+  const candidates = Object.keys(store).filter(id=>store[id].status==='available' && !state.selectedSeats.includes(id));
+  if(candidates.length===0){ toast('No free seat to demo with', 'Try again after deselecting a seat.'); return; }
+  const seatId = candidates[Math.floor(Math.random()*candidates.length)];
+  const el = document.getElementById('seat-'+seatId);
+  el.style.outline = '2px solid var(--gold)';
+  toast('Simulating collision…', `User A and User B both clicking seat ${seatId} at t=0ms`, 'good');
+
+  Promise.all([
+    requestSeatLock(seatId, 'User A'),
+    requestSeatLock(seatId, 'User B')
+  ]).then(([ra, rb])=>{
+    el.style.outline = 'none';
+    renderSeatMap();
+    if(!ra.ok && !rb.ok){
+      el.classList.add('conflict'); setTimeout(()=>el.classList.remove('conflict'),400);
+      flashAlert('seatAlert','Both bookings cancelled', `Seat ${seatId}: User A and User B clicked within the same instant. MoviQ's lock service detected the tie and voided both requests rather than picking a "winner" — the seat is available again for anyone.`);
+      toast('Demo complete', `Seat ${seatId}: both User A and User B were declined. Seat released.`, 'warn');
+    }
+  });
+}
+
+function flashAlert(id, title, body){
+  const el = document.getElementById(id);
+  if(document.getElementById(id+'Title')) document.getElementById(id+'Title').textContent = title;
+  if(document.getElementById(id+'Body')) document.getElementById(id+'Body').textContent = body;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 6000);
+}
+
+// ---------- background "live" activity to sell realism ----------
+let activityTimer = null;
+function startActivityFeed(){
+  clearInterval(activityTimer);
+  const feed = document.getElementById('activityFeed');
+  feed.innerHTML = '';
+  activityTimer = setInterval(()=>{
+    if(state.view !== 'seats') return;
+    const store = getSeatStore(state.showKey);
+    const avail = Object.keys(store).filter(id=>store[id].status==='available' && !state.selectedSeats.includes(id));
+    if(avail.length < 4 || Math.random() > 0.35) return;
+    const id = avail[Math.floor(Math.random()*avail.length)];
+    store[id].status = 'booked';
+    const row = document.createElement('div');
+    row.className='row';
+    row.innerHTML = `<span>guest_${Math.floor(Math.random()*899+100)} booked seat ${id}</span><span>now</span>`;
+    feed.prepend(row);
+    while(feed.children.length>4) feed.removeChild(feed.lastChild);
+    if(document.getElementById('seat-'+id)) renderSeatMap();
+  }, 3500);
+}
+
+// ---------- hold timer ----------
+function startHoldTimer(){
+  clearInterval(state.holdInterval);
+  state.holdSeconds = 300;
+  updateClock();
+  state.holdInterval = setInterval(()=>{
+    state.holdSeconds--;
+    updateClock();
+    if(state.holdSeconds<=0){
+      clearInterval(state.holdInterval);
+      expireHold();
+    }
+  },1000);
+}
+function updateClock(){
+  const m = Math.floor(state.holdSeconds/60).toString().padStart(2,'0');
+  const s = (state.holdSeconds%60).toString().padStart(2,'0');
+  const clk = document.getElementById('holdClock');
+  if(clk) clk.textContent = `${m}:${s}`;
+}
+function expireHold(){
+  const store = getSeatStore(state.showKey);
+  state.selectedSeats.forEach(id=>{ if(store[id]) { store[id].status='available'; store[id].lockedBy=null; } });
+  state.selectedSeats = [];
+  renderSeatMap(); updateSummary();
+  toast('Hold expired', 'Your seat hold timed out and was released.', 'warn');
+}
+
+// ---------- summary panel ----------
+function updateSummary(){
+  document.getElementById('sumMovieTitle').textContent = state.movie ? state.movie.title : '—';
+  document.getElementById('sumShowInfo').textContent = state.showLabel;
+  const chips = document.getElementById('seatChips');
+  chips.innerHTML = state.selectedSeats.length
+    ? state.selectedSeats.sort().map(s=>`<span class="chip">${s}</span>`).join('')
+    : '<span style="color:var(--faint); font-size:12px;">No seats selected yet</span>';
+  document.getElementById('seatCount').textContent = state.selectedSeats.length;
+  const subtotal = state.selectedSeats.length * state.price;
+  const fee = state.selectedSeats.length ? Math.round(subtotal*0.06) : 0;
+  document.getElementById('ticketSubtotal').textContent = '₹'+subtotal;
+  document.getElementById('convFee').textContent = '₹'+fee;
+  document.getElementById('totalAmt').textContent = '₹'+(subtotal+fee);
+  document.getElementById('proceedBtn').disabled = state.selectedSeats.length===0;
+}
+
+// ---------- checkout ----------
+function proceedToPay(){
+  // re-validate holds are still mine before allowing checkout
+  const store = getSeatStore(state.showKey);
+  const invalid = state.selectedSeats.filter(id=> !store[id] || store[id].status!=='held' || store[id].lockedBy!=='me');
+  if(invalid.length){
+    flashAlert('seatAlert','Hold lost', `Seat(s) ${invalid.join(', ')} are no longer held by you. Please reselect.`);
+    renderSeatMap();
+    return;
+  }
+  go('checkout');
+  document.getElementById('coMovieTitle').textContent = state.movie.title;
+  document.getElementById('coShowInfo').textContent = state.showLabel;
+  document.getElementById('coSeatChips').innerHTML = state.selectedSeats.sort().map(s=>`<span class="chip">${s}</span>`).join('');
+  const subtotal = state.selectedSeats.length*state.price;
+  const fee = Math.round(subtotal*0.06);
+  document.getElementById('coSubtotal').textContent = '₹'+subtotal;
+  document.getElementById('coFee').textContent = '₹'+fee;
+  document.getElementById('coTotal').textContent = '₹'+(subtotal+fee);
+  document.getElementById('payAmtLabel').textContent = '· ₹'+(subtotal+fee);
+  document.getElementById('payAlert').classList.remove('show');
+}
+
+function confirmPayment(){
+  // FINAL server-side-style re-check right before charging the card —
+  // this is what guarantees "booked seat, shown at payment, sent back".
+  const store = getSeatStore(state.showKey);
+  const stolen = state.selectedSeats.filter(id => !store[id] || store[id].status==='booked' || (store[id].status==='held' && store[id].lockedBy!=='me'));
+  if(stolen.length){
+    document.getElementById('payAlertBody').textContent = `Seat(s) ${stolen.join(', ')} were booked by someone else while you were entering payment details. You have not been charged.`;
+    document.getElementById('payAlert').classList.add('show');
+    setTimeout(()=>{
+      // send them back to seat selection, as required
+      state.selectedSeats = state.selectedSeats.filter(id=>!stolen.includes(id));
+      go('seats');
+      renderSeatMap(); updateSummary();
+      toast('Returned to seat selection', 'Please choose a different seat for the ones that were taken.', 'warn');
+    }, 2200);
+    return;
+  }
+  // success: confirm booking
+  state.selectedSeats.forEach(id=>{ store[id].status='booked'; store[id].lockedBy=null; });
+  clearInterval(state.holdInterval);
+  const bookingId = 'MQ' + Date.now().toString().slice(-8);
+  const subtotal = state.selectedSeats.length*state.price;
+  const fee = Math.round(subtotal*0.06);
+  const booking = {
+    id: bookingId, movie: state.movie.title, show: state.showLabel,
+    seats: [...state.selectedSeats].sort(), amount: subtotal+fee
+  };
+  state.bookings.unshift(booking);
+
+  document.getElementById('tkMovie').textContent = booking.movie;
+  document.getElementById('tkShow').textContent = booking.show;
+  document.getElementById('tkSeats').textContent = booking.seats.join(', ');
+  document.getElementById('tkAmt').textContent = '₹'+booking.amount;
+  document.getElementById('tkId').textContent = booking.id;
+
+  state.selectedSeats = [];
+  go('confirm');
+  toast('Booking confirmed', `${booking.seats.length} seat(s) reserved. Ticket ${booking.id} issued.`, 'good');
+}
+
+// ---------- my bookings ----------
+function renderBookings(){
+  const wrap = document.getElementById('bookingsList');
+  if(!state.bookings.length){
+    wrap.innerHTML = `<div style="color:var(--faint); font-family:var(--mono); font-size:13px; padding:40px 0; text-align:center; border:1px dashed var(--line); border-radius:14px;">No bookings yet this session — go book something great.</div>`;
+    return;
+  }
+  wrap.innerHTML = state.bookings.map(b=>`
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 22px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-family:var(--display); font-size:20px; letter-spacing:.5px;">${b.movie}</div>
+        <div style="color:var(--muted); font-size:12.5px; font-family:var(--mono);">${b.show} · Seats ${b.seats.join(', ')}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--mono); color:var(--gold); font-size:13px;">${b.id}</div>
+        <div style="color:var(--muted); font-size:12px;">₹${b.amount}</div>
+      </div>
+    </div>`).join('');
+}
+
+// init
+updateSummary();
+</script>
+</body>
+</html>
